@@ -1,4 +1,4 @@
-# makeup-analyzer
+# skincare-analyzer 
 
 Chrome extension that will outline on Amazon:
 
