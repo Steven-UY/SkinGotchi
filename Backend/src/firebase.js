@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAnalytics } from "firebase/analytics";
-import { getFirestore, collection, addDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, setDoc, doc } from 'firebase/firestore';
 
 
 const firebaseConfig = {
@@ -20,14 +20,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
 
-//add data to db
-try {
-  const docRef = await addDoc(collection(db, "users"), {
-    first: "Ada",
-    last: "Lovelace",
-    born: 1815
-  });
-  console.log("Document written with ID: ", docRef.id);
-} catch (e) {
-  console.error("Error adding document: ", e);
-}
+//add new document in collection "users" id auto generated
+const docRef = await addDoc(collection(db, "users"),{
+  firstname: "George",
+  lastname: "Hotz",
+  skintype: "Oily"
+});
+console.log("Document written with ID: ", docRef.id);
+
