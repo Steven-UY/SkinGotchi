@@ -1,10 +1,11 @@
 const express = require('express');
 const app = express();
 const port = 8383;
-const { db } = require('./firebase.js');
+const { db, getAuth } = require('./firebase.js');
 const User = require('./models/userModel.js');
 
 app.use(express.json());
+
 
 //create user with POST request
 app.post('/addUser', async (req, res) => {
@@ -16,11 +17,27 @@ app.post('/addUser', async (req, res) => {
             return res.status(400).send('Missing required fields');
         }
 
+        //create user with firebase authentication
+        const userRecord = await getAuth().createUser({
+            email: email,
+            password: password,
+            displayName: `${firstname} ${lastname}`,
+            disabled: false
+        });
+
+        console.log('Successfully created new user:', userRecord.uid);
+
         //create new user instance
         const user = new User(firstname, lastname, email, password, skintype, skinproblems);
 
-        //add doc to firestore
-        const docRef = await db.collection('users').add({ ...user });
+        // Add doc to Firestore (no password for security)
+        const docRef = await db.collection('users').add({
+            firstname: firstname,
+            lastname: lastname,
+            email: email,
+            skintype: skintype,
+            skinproblems: skinproblems
+        });
 
         res.status(200).send(`User created successfully with ID: ${docRef.id}`);
     } catch(error) {
@@ -28,8 +45,6 @@ app.post('/addUser', async (req, res) => {
         res.status(500).send(`Error creating user: ${error.message}`);
     }
 });
-
-//update user with 
 
 
 app.listen(port, () => {
