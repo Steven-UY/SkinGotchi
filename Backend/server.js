@@ -1,9 +1,8 @@
 const express = require('express');
 const app = express();
 const port = 8383;
-const { db } = require('./firebase.js');
+const { db, getAuth } = require('./firebase.js');
 const User = require('./models/userModel.js');
-const { getAuth } = require('firebase-admin/auth');
 
 app.use(express.json());
 
@@ -39,7 +38,7 @@ app.post('/addUser', async (req, res) => {
             skintype: skintype,
             skinproblems: skinproblems
         });
-        
+
         res.status(200).send(`User created successfully with ID: ${docRef.id}`);
     } catch(error) {
         console.log('Error creating user:', error);
