@@ -46,6 +46,8 @@ app.post('/addUser', async (req, res) => {
     }
 });
 
+//TODO: Figure out a way to read in the skintype and skinproblems of a given user
+
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
