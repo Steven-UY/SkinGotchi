@@ -24,6 +24,7 @@ async function handleSignIn(event) {
   const password = document.getElementById('password').value;
 
   try {
+    //retrieves id from signed-in user
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
     const idToken = await user.getIdToken();
