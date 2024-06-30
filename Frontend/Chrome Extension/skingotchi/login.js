@@ -14,3 +14,4 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
     // Example: Perform the login action (you can replace this with your own logic)
     console.log("Logging in with", email, password);
     alert("Login successful!");
+    

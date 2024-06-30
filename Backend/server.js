@@ -46,8 +46,38 @@ app.post('/addUser', async (req, res) => {
     }
 });
 
-//TODO: Figure out a way to read in the skintype and skinproblems of a given user
-
+app.post('/verifyToken', async (req, res) => {
+    const idToken = req.headers.authorization?.split('Bearer ')[1];
+    const { email } = req.body;
+  
+    if (!idToken || !email) {
+      return res.status(401).send('Unauthorized');
+    }
+  
+    try {
+      // Verify the ID token
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      const uid = decodedToken.uid;
+  
+      // Fetch user data from Firestore using the UID
+      const userDoc = await db.collection('users').doc(uid).get();
+      if (!userDoc.exists) {
+        throw new Error('User not found');
+      }
+      const userData = userDoc.data();
+  
+      // Check if the email in the document matches the provided email
+      if (userData.email !== email) {
+        return res.status(401).send('Unauthorized');
+      }
+  
+      // Send the user data as the response
+      res.json(userData);
+    } catch (error) {
+      console.error('Error verifying ID token or fetching user data:', error);
+      res.status(401).send('Unauthorized');
+    }
+  });
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);

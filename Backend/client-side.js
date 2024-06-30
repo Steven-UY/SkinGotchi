@@ -16,26 +16,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// Function to handle form submission
-async function handleSignIn(event) {
-  event.preventDefault();
-
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
+async function authenticateAndGetToken(email, password) {
   try {
-    //retrieves id from signed-in user
+    // Sign in the user
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+
+    // Get the ID token
     const idToken = await user.getIdToken();
 
-    const response = await fetch('/getUserSkinDetails', {
+    console.log('ID Token:', idToken);
+    return idToken;
+  } catch (error) {
+    console.error('Error during authentication:', error);
+  }
+}
+
+async function testServer(idToken, email) {
+  try {
+    // Send a request to the backend with the ID token only
+    const response = await fetch('http://localhost:3000/verifyToken', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`
       },
-      body: JSON.stringify({ productDetails: { /* product data */ } })
+      body: JSON.stringify({ email })
     });
 
     if (!response.ok) {
@@ -43,11 +49,19 @@ async function handleSignIn(event) {
     }
 
     const data = await response.json();
-    console.log('Skin details:', data);
+    console.log('User details:', data);
   } catch (error) {
-    console.error('Error signing in or fetching skin details:', error);
+    console.error('There was a problem with the fetch operation:', error);
   }
 }
 
-// Add event listener to the form
-document.getElementById('sign-in-form').addEventListener('submit', handleSignIn);
+// Example usage with a test user
+const testEmail = 'testuser@example.com';
+const testPassword = 'testpassword';
+
+authenticateAndGetToken(testEmail, testPassword).then(({ idToken, email }) => {
+  if (idToken) {
+    testServer(idToken, email);
+  }
+});
+
