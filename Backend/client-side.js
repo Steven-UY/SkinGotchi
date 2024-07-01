@@ -16,38 +16,32 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-async function authenticateAndGetToken(email, password) {
+// Function to handle form submission
+async function handleSignIn(event) {
+  event.preventDefault();
+
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+
   try {
-    // Sign in the user
+    // Authenticate the user and get the ID token
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-
-    // Get the ID token
     const idToken = await user.getIdToken();
-
-    console.log('ID Token:', idToken);
-    return idToken;
-  } catch (error) {
-    console.error('Error during authentication:', error);
-  }
-}
-
-async function testServer(idToken, email) {
-  try {
+  
     // Send a request to the backend with the ID token only
-    const response = await fetch('http://localhost:3000/verifyToken', {
+    const response = await fetch('/verifyToken', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${idToken}`
-      },
-      body: JSON.stringify({ email })
+      }
     });
-
+    
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }
-
+  
     const data = await response.json();
     console.log('User details:', data);
   } catch (error) {
@@ -55,13 +49,5 @@ async function testServer(idToken, email) {
   }
 }
 
-// Example usage with a test user
-const testEmail = 'testuser@example.com';
-const testPassword = 'testpassword';
-
-authenticateAndGetToken(testEmail, testPassword).then(({ idToken, email }) => {
-  if (idToken) {
-    testServer(idToken, email);
-  }
-});
-
+//Add event listener to the form
+document.getElementById('sign-in-form').addEventListener('submit', handleSignIn);
