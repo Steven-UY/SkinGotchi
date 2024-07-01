@@ -4,9 +4,9 @@ const { getAuth } = require('firebase-admin/auth');
 
 const serviceAccount = require('./creds.json');
 
-initializeApp({
+const app = initializeApp({
     credential: cert(serviceAccount)
-})
+});
 
 const db = getFirestore();
 const auth = getAuth();

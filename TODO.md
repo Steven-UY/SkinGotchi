@@ -5,7 +5,7 @@
 - [] Authenticate user on the client side
 - [] Pass ID token to backend
 - [] Verify ID token on backend
-- [] Fetch user data from firestore
+- [] Fetch user data 
 - [] update a User successfully
 - [] delete a User successfully
 - [] read information about a User(skintype/problem)
