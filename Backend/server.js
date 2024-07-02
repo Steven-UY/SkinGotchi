@@ -1,15 +1,22 @@
 const express = require('express');
+const path = require('path');
+const { db, auth } = require('./firebase');
+const User = require('./models/userModel');
+
 const app = express();
 const port = 8383;
-const { db, auth } = require('./firebase'); // Assuming you export `auth` from your `firebase.js`
-const User = require('./models/userModel');
-const { getAuth } = require('firebase-admin/auth');
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, '../Frontend')));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../Frontend/login.html'));
+  });
 
 // Create user with POST request
 app.post('/addUser', async (req, res) => {
     try {
+
         const { firstname, lastname, email, password, skintype, skinproblems } = req.body;
 
         // Validate required fields

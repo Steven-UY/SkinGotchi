@@ -4,12 +4,12 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "your-api-key",
-  authDomain: "your-auth-domain",
-  projectId: "your-project-id",
-  storageBucket: "your-storage-bucket",
-  messagingSenderId: "your-messaging-sender-id",
-  appId: "your-app-id"
+  apiKey: "AIzaSyCgQq7oJBQmva2xKUj_TuLsB7CS4ZunoZY",
+  authDomain: "skincare-analyzer.firebaseapp.com",
+  projectId: "skincare-analyzer",
+  storageBucket: "skincare-analyzer.appspot.com",
+  messagingSenderId: "942303322650",
+  appId: "1:942303322650:web:e0fb8d0b1da5272ce867a3"
 };
 
 // Initialize Firebase
