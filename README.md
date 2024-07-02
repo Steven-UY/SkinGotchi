@@ -1,4 +1,4 @@
-# skincare-analyzer 
+# SkinGotchi
 
 Chrome extension that will outline on Amazon:
 
