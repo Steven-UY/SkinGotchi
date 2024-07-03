@@ -125,22 +125,6 @@ app.post('/signup', async(req, res) => {
     }
 });
 
-//creates user
-app.post('/create', async(req, res) => {
-    try{
-        const id = req.body.email;
-        console.log(req.body);
-        const userJson = {
-            email : req.body.email,
-            firstName : req.body.firstName,
-            lastName : req.body.lastName 
-        };
-        const response = await db.collection("users").add(userJson);
-        res.send(response);
-    } catch(error) {
-        res.send(error);
-    }
-})
 
 //reads all the documents
 app.get('/read/all', async(req, res) => {
@@ -166,22 +150,6 @@ app.get('/read/:id', async (req, res) => {
     } catch(error) {
         res.send(error);
     }
-})
-
-//creates user with auth credentials
-app.post('/signup', async(req, res) => {
-    console.log(req.body);
-    const user = {
-        email : req.body.email,
-        password : req.body.password
-    }
-    const userResponse = await admin.auth().createUser({
-        email: user.email,
-        password: user.password,
-        emailVerified: false,
-        disabled: false
-    });
-    res.json(userResponse);
 })
 
 //update user
