@@ -1,10 +1,11 @@
-const express = require('express');
-const path = require('path');
-const { db, auth } = require('./firebase');
-const User = require('./models/userModel');
-
+const express = require("express");
 const app = express();
-const port = 8383;
+const admin = require("firebase-admin");
+const credentials = require("./creds.json");
+
+admin.initializeApp({
+    credential: admin.credential.cert(credentials)
+});
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../Frontend')));
@@ -13,74 +14,95 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../Frontend/login.html'));
   });
 
-// Create user with POST request
-app.post('/addUser', async (req, res) => {
-    try {
+app.use(express.urlencoded({extended: true}));
 
-        const { firstname, lastname, email, password, skintype, skinproblems } = req.body;
+const db = admin.firestore();
 
-        // Validate required fields
-        if (!firstname || !lastname || !email || !password || !skintype) {
-            return res.status(400).send('Missing required fields');
-        }
+//create user(with auth)
+app.post('/signup', async(req, res) => {
+    try{
+        const { email, password, firstName, lastName } = req.body;
 
-        // Create user with Firebase authentication
-        const userRecord = await auth.createUser({
+        const userResponse = await admin.auth().createUser({
             email: email,
             password: password,
-            displayName: `${firstname} ${lastname}`,
+            emailVerified: false,
             disabled: false
         });
 
-        console.log('Successfully created new user:', userRecord.uid);
-
-        // Create new user instance
-        const user = new User(firstname, lastname, email, password, skintype, skinproblems);
-
-        // Add doc to Firestore (no password for security)
-        const docRef = await db.collection('users').add({
-            firstname: firstname,
-            lastname: lastname,
+        const userJson = {
             email: email,
-            skintype: skintype,
-            skinproblems: skinproblems
+            firstName: firstName,
+            lastName: lastName,
+        };
+        await db.collection("users").doc(userResponse.uid).set(userJson);
+
+        res.json(userResponse);
+    } catch(error){
+        res.status(400).send(error);
+    }
+});
+
+
+//reads all the documents
+app.get('/read/all', async(req, res) => {
+    try{
+        const usersRef = db.collection("users");
+        const response = await usersRef.get();
+        let responseArr = [];
+        response.forEach(doc => {
+            responseArr.push(doc.data());
         });
-
-        res.status(200).send(`User created successfully with ID: ${docRef.id}`);
-    } catch (error) {
-        console.log('Error creating user:', error);
-        res.status(500).send(`Error creating user: ${error.message}`);
+        res.send(responseArr);
+    } catch(error) {
+        res.send(error);
     }
+})
+
+//read particular id
+app.get('/read/:id', async (req, res) => {
+    try{
+        const usersRef = db.collection("users").doc(req.params.id);
+        const response = await usersRef.get();
+        res.send(responseArr);
+    } catch(error) {
+        res.send(error);
+    }
+})
+
+//update user
+app.post('/update', async(req, res) => {
+    try{
+        const id = req.body.id;
+        const newFirstName = "jeff";
+        const userRef = await db.collection("users").doc(id)
+        .update({
+            firstName: newFirstName
+        });
+        res.send(response);
+    } catch(error) {
+        res.send(error);
+    }
+})
+
+//delete document based on id
+app.delete('/delete/:id', async(req, res) => {
+    try{
+        const response = await db.collection("users").doc(req.params.id).delete();
+        res.send(response);
+    } catch(error) {
+        res.send(error);
+    }
+})
+
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`Server is running on PORT ${PORT}.`);
 });
 
-app.post('/verifyToken', async (req, res) => {
-    //extracts the idtoken
-    const idToken = req.headers.authorization?.split('Bearer ')[1];
-
-    if (!idToken) {
-        return res.status(401).send('Unauthorized');
-    }
-
-    try {
-        // Verify the ID token obtain UID
-        const decodedToken = await auth.verifyIdToken(idToken);
-        const uid = decodedToken.uid;
-
-        // Fetch user data from Firestore using the UID
-        const userDoc = await db.collection('users').doc(uid).get();
-        if (!userDoc.exists) {
-            throw new Error('User not found');
-        }
-        const userData = userDoc.data();
-
-        // Send the user data as the response
-        res.json(userData);
-    } catch (error) {
-        console.error('Error verifying ID token or fetching user data:', error);
-        res.status(401).send('Unauthorized');
-    }
-});
-
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`);
-});
+/*
+1) whenever we create a user it's with auth(done)
+2) change the fields to match the data that we want
+3) implement signin functionality with JWTs
+*/
