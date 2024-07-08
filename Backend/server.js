@@ -13,6 +13,21 @@ app.use(express.urlencoded({extended: true}));
 
 const db = admin.firestore();
 
+//route to verify token
+app.post('/verify-token', async (req, res) => {
+    const token = req.body.token;
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        const uid = decodedToken.uid;
+        //token is valid use the uid to identify the user
+        res.json({ success: true, uid: uid });
+    } catch(error) {
+        console.error('Error verifying token: ', error);
+        res.status(401).json({ success: false, error: 'Invalid token'});
+    }
+});
+
 //create user (with auth)
 app.post('/signup', async(req, res) => {
     try{
