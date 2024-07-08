@@ -13,7 +13,7 @@ app.use(express.urlencoded({extended: true}));
 
 const db = admin.firestore();
 
-//create user(with auth)
+//create user (with auth)
 app.post('/signup', async(req, res) => {
     try{
         const { email, password, firstName, lastName } = req.body;
@@ -97,7 +97,8 @@ app.listen(PORT, () => {
 });
 
 /*
-1) whenever we create a user it's with auth(done)
-2) change the fields to match the data that we want
-3) implement signin functionality with JWTs
+TODO:
+1) whenever we create a user it's with auth[x]
+2) implement signin functionality with JWTS[]
+3) change the fields in the documents to match data[] 
 */
