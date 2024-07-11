@@ -1,3 +1,6 @@
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+
 const firebaseConfig = {
     apiKey: "AIzaSyCgQq7oJBQmva2xKUj_TuLsB7CS4ZunoZY",
     authDomain: "skincare-analyzer.firebaseapp.com",
@@ -8,4 +11,8 @@ const firebaseConfig = {
     measurementId: "G-92QQXCXELJ"
   };
 
-export default firebaseConfig;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+export { app, auth };
