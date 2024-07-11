@@ -1,4 +1,5 @@
 const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'development',
@@ -17,7 +18,9 @@ module.exports = {
        open: true,
        hot: true,
        compress: true,
-       historyApiFallback: true  
+       historyApiFallback: {
+        index: '/login.html',
+       },
     },
     module: {
         rules: [
@@ -33,4 +36,11 @@ module.exports = {
             }
         ],
     },
+    plugins: [
+        new HtmlWebpackPlugin({
+            title: 'Webpack App',
+            filename: 'login.html',
+            template: 'src/login.html'
+        }), 
+    ],
 }

@@ -1,0 +1,33 @@
+<html>
+  <head>
+    <link rel="stylesheet" href="login.css">
+    <style>
+      html {
+        height: 600px;  
+        width: 350px;      
+      }
+      </style>
+  </head>
+  <body>
+    <div class="container">
+      <img src="cutie.png" alt="SkinGotchi Logo" class="center">
+      <h1 class = 'title'> SkinGotchi </h1>
+    </div>
+    <div class="line-container">
+      <hr class="line">
+    </div>
+    <p class = 'blurb'> Log Into skingotchi </p>
+    <div class="line-container">
+      <hr class="line">
+    </div>
+    <form class = 'login' id = 'sign-in-form'>
+      <input type="text" placeholder="Email" name="email" id="email" required>
+      <input type="password" placeholder="Password" id="password" name="password">
+      <input type="submit" value="Log in">
+    </form>
+    <script type="module" src="./bundle.js"></script>
+    <!--Add firebase SDK-->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  </body>
+</html>
