@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const admin = require("firebase-admin");
 const credentials = require("./creds.json");
+const cors = require('cors');
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
@@ -9,6 +10,7 @@ admin.initializeApp({
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 
 const db = admin.firestore();
 

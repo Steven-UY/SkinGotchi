@@ -34,7 +34,7 @@ function loginAndGetToken(email, password) {
 
 function sendTokenToBackend(token) {
   // Send token to the backend
-  fetch('/verify-token', {
+  fetch('http://localhost:8080/verify-token', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
