@@ -1,4 +1,6 @@
+import { auth } from './firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import './login.css';
 
 // Get form element
 const signInForm = document.getElementById('sign-in-form');

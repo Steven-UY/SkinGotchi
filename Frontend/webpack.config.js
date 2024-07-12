@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
     mode: 'development',
@@ -33,7 +34,18 @@ module.exports = {
                         presets: ['@babel/preset-env']
                     }
                 }
-            }
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    'css-loader'
+                ],
+            },
+            {
+                test: /\.(png|svg|jpg|jpeg|gif)$/i,
+                type: 'asset/resource', 
+            },
         ],
     },
     plugins: [
@@ -41,6 +53,9 @@ module.exports = {
             title: 'Webpack App',
             filename: 'login.html',
             template: 'src/login.html'
+        }),
+        new MiniCssExtractPlugin({
+            filename: '[name].css',
         }), 
     ],
 }
