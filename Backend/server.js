@@ -3,6 +3,7 @@ const app = express();
 const admin = require("firebase-admin");
 const credentials = require("./creds.json");
 const cors = require('cors');
+const verifyToken = require('./authMiddleware');
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
@@ -70,16 +71,24 @@ app.get('/read/all', async(req, res) => {
     }
 })
 
-//read particular id
-app.get('/read/:id', async (req, res) => {
-    try{
-        const usersRef = db.collection("users").doc(req.params.id);
-        const response = await usersRef.get();
-        res.send(responseArr);
-    } catch(error) {
-        res.send(error);
+// Read particular id (protected)
+app.get('/read/:id', verifyToken, async (req, res) => {
+    try {
+        // Ensure the UID from the token matches the requested UID
+        if (req.uid !== req.params.id) {
+            return res.status(403).json({ success: false, error: 'Unauthorized access' });
+        }
+
+        const userDoc = await db.collection('users').doc(req.params.id).get();
+        if (!userDoc.exists) {
+            res.status(404).json({ success: false, error: 'User not found' });
+        } else {
+            res.json({ success: true, data: userDoc.data() });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
-})
+});
 
 //update user
 app.post('/update', async(req, res) => {

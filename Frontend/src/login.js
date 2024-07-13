@@ -15,7 +15,6 @@ signInForm.addEventListener('submit', (e) => {
   loginAndGetToken(email, password)
     .then((idToken) => {
       console.log("Login successful. ID token:", idToken);
-      // Send token to backend
       sendTokenToBackend(idToken);
     })
     .catch((error) => {
@@ -33,7 +32,7 @@ function loginAndGetToken(email, password) {
 }
 
 function sendTokenToBackend(token) {
-  // Send token to the backend
+  // Make request to the backend
   fetch('http://localhost:8080/verify-token', {
     method: 'POST',
     headers: {
