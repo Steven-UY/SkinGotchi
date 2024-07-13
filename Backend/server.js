@@ -2,18 +2,35 @@ const express = require("express");
 const app = express();
 const admin = require("firebase-admin");
 const credentials = require("./creds.json");
+const cors = require('cors');
+const verifyToken = require('./authMiddleware');
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
 });
 
 app.use(express.json());
-
 app.use(express.urlencoded({extended: true}));
+app.use(cors());
 
 const db = admin.firestore();
 
-//create user(with auth)
+//route to verify token
+app.post('/verify-token', async (req, res) => {
+    const token = req.body.token;
+
+    try {
+        const decodedToken = await admin.auth().verifyIdToken(token);
+        const uid = decodedToken.uid;
+        //token is valid use the uid to identify the user
+        res.json({ success: true, uid: uid });
+    } catch(error) {
+        console.error('Error verifying token: ', error);
+        res.status(401).json({ success: false, error: 'Invalid token'});
+    }
+});
+
+//create user (with auth)
 app.post('/signup', async(req, res) => {
     try{
         const { email, password, firstName, lastName } = req.body;
@@ -54,16 +71,24 @@ app.get('/read/all', async(req, res) => {
     }
 })
 
-//read particular id
-app.get('/read/:id', async (req, res) => {
-    try{
-        const usersRef = db.collection("users").doc(req.params.id);
-        const response = await usersRef.get();
-        res.send(responseArr);
-    } catch(error) {
-        res.send(error);
+// Read particular id (protected)
+app.get('/read/:id', verifyToken, async (req, res) => {
+    try {
+        // Ensure the UID from the token matches the requested UID
+        if (req.uid !== req.params.id) {
+            return res.status(403).json({ success: false, error: 'Unauthorized access' });
+        }
+
+        const userDoc = await db.collection('users').doc(req.params.id).get();
+        if (!userDoc.exists) {
+            res.status(404).json({ success: false, error: 'User not found' });
+        } else {
+            res.json({ success: true, data: userDoc.data() });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
-})
+});
 
 //update user
 app.post('/update', async(req, res) => {
@@ -97,7 +122,8 @@ app.listen(PORT, () => {
 });
 
 /*
-1) whenever we create a user it's with auth(done)
-2) change the fields to match the data that we want
-3) implement signin functionality with JWTs
+TODO:
+1) whenever we create a user it's with auth[x]
+2) implement signin functionality with JWTS[]
+3) change the fields in the documents to match data[] 
 */
