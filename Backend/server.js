@@ -15,20 +15,6 @@ app.use(cors());
 
 const db = admin.firestore();
 
-//route to verify token
-app.post('/verify-token', async (req, res) => {
-    const token = req.body.token;
-
-    try {
-        const decodedToken = await admin.auth().verifyIdToken(token);
-        const uid = decodedToken.uid;
-        //token is valid use the uid to identify the user
-        res.json({ success: true, uid: uid });
-    } catch(error) {
-        console.error('Error verifying token: ', error);
-        res.status(401).json({ success: false, error: 'Invalid token'});
-    }
-});
 
 //create user (with auth)
 app.post('/signup', async(req, res) => {
@@ -71,24 +57,19 @@ app.get('/read/all', async(req, res) => {
     }
 })
 
-// Read particular id (protected)
-app.get('/read/:id', verifyToken, async (req, res) => {
+// read data for the logged-in user
+app.get('/read/me', verifyToken, async (req, res) => {
     try {
-        // Ensure the UID from the token matches the requested UID
-        if (req.uid !== req.params.id) {
-            return res.status(403).json({ success: false, error: 'Unauthorized access' });
-        }
-
-        const userDoc = await db.collection('users').doc(req.params.id).get();
-        if (!userDoc.exists) {
-            res.status(404).json({ success: false, error: 'User not found' });
-        } else {
-            res.json({ success: true, data: userDoc.data() });
-        }
+      const userDoc = await db.collection('users').doc(req.uid).get();
+      if (!userDoc.exists) {
+        res.status(404).json({ success: false, error: 'User not found' });
+      } else {
+        res.json({ success: true, data: userDoc.data() });
+      }
     } catch (error) {
-        res.status(500).json({ success: false, error: 'Internal server error' });
+      res.status(500).json({ success: false, error: 'Internal server error' });
     }
-});
+  });
 
 //update user
 app.post('/update', async(req, res) => {

@@ -13,10 +13,11 @@ signInForm.addEventListener('submit', (e) => {
   const password = document.getElementById('password').value;
   
   loginAndGetToken(email, password)
-    .then((idToken) => {
-      console.log("Login successful. ID token:", idToken);
-      sendTokenToBackend(idToken);
-    })
+  .then((idToken) => {
+    console.log("Login successful. ID token:", idToken);
+    // Save the token (e.g., in local storage)
+    localStorage.setItem('idToken', idToken);
+  })
     .catch((error) => {
       console.error("Login failed:", error.message);
       alert("Login failed: " + error.message);
@@ -31,21 +32,26 @@ function loginAndGetToken(email, password) {
     });
 }
 
-function sendTokenToBackend(token) {
-  // Make request to the backend
-  fetch('http://localhost:8080/verify-token', {
-    method: 'POST',
+// Function to read user data using the token
+function readUserData(token) {
+  return fetch(`http://localhost:8080/read/me`, {
+    method: 'GET',
     headers: {
       'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`, // Include token in Authorization header
     },
-    body: JSON.stringify({ token: token }),
   })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+    return response.json();
+  })
   .then(data => {
-    console.log('Success:', data);
-    // Handle successful verification (e.g., redirect to dashboard)
-  })
-  .catch((error) => {
-    console.error('Error: ', error);
+    if (data.success) {
+      return data.data; // Return the user data
+    } else {
+      throw new Error(data.error || 'Failed to read user data');
+    }
   });
 }
