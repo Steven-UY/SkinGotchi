@@ -121,9 +121,3 @@ app.listen(PORT, () => {
     console.log(`Server is running on PORT ${PORT}.`);
 });
 
-/*
-TODO:
-1) whenever we create a user it's with auth[x]
-2) implement signin functionality with JWTS[]
-3) change the fields in the documents to match data[] 
-*/
