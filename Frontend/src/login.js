@@ -15,8 +15,13 @@ signInForm.addEventListener('submit', (e) => {
   loginAndGetToken(email, password)
   .then((idToken) => {
     console.log("Login successful. ID token:", idToken);
-    // Save the token (e.g., in local storage)
-    localStorage.setItem('idToken', idToken);
+    return storeTokenInSession(idToken);
+  })
+  .then(() => {
+    return readUserData();
+  })
+  .then((userData) => {
+    console.log("User Data:", userData);
   })
     .catch((error) => {
       console.error("Login failed:", error.message);
@@ -32,7 +37,22 @@ function loginAndGetToken(email, password) {
     });
 }
 
-// Function to read user data using the token
+function storeTokenInSession(token) {
+  return fetch('http://localhost:8080/storeToken', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ token }),
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Failed to store token in session');
+    }
+  });
+}
+
+// Function to read user data using the token 
 function readUserData(token) {
   return fetch(`http://localhost:8080/read/me`, {
     method: 'GET',

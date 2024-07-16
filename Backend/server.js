@@ -1,4 +1,5 @@
 const express = require("express");
+const session = require('express-session'); 
 const app = express();
 const admin = require("firebase-admin");
 const credentials = require("./creds.json");
@@ -15,8 +16,14 @@ app.use(cors());
 
 const db = admin.firestore();
 
+app.use(session({
+    secret: 'your-secret-key',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }
+}));
 
-//create user (with auth)
+//create user with auth
 app.post('/signup', async(req, res) => {
     try{
         const { email, password, firstName, lastName } = req.body;
@@ -41,23 +48,14 @@ app.post('/signup', async(req, res) => {
     }
 });
 
+//store token in session
+app.post('/storeToken', (req, res) => {
+    const { token } = req.body;
+    req.session.token = token;
+    res.sendStatus(200);
+}) 
 
-//reads all the documents
-app.get('/read/all', async(req, res) => {
-    try{
-        const usersRef = db.collection("users");
-        const response = await usersRef.get();
-        let responseArr = [];
-        response.forEach(doc => {
-            responseArr.push(doc.data());
-        });
-        res.send(responseArr);
-    } catch(error) {
-        res.send(error);
-    }
-})
-
-// read data for the logged-in user
+//read data for the logged-in user
 app.get('/read/me', verifyToken, async (req, res) => {
     try {
       const userDoc = await db.collection('users').doc(req.uid).get();
