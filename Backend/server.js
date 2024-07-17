@@ -1,10 +1,10 @@
 const express = require("express");
-const session = require('express-session'); 
 const app = express();
 const admin = require("firebase-admin");
 const credentials = require("./creds.json");
 const cors = require('cors');
 const verifyToken = require('./authMiddleware.js');
+const cookieParser = require('cookie-parser');
 
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
@@ -12,16 +12,14 @@ admin.initializeApp({
 
 app.use(express.json());
 app.use(express.urlencoded({extended: true}));
-app.use(cors());
+// Configure CORS
+app.use(cors({
+    origin: 'http://localhost:3000', 
+    credentials: true
+}));
+app.use(cookieParser());
 
 const db = admin.firestore();
-
-app.use(session({
-    secret: 'your-secret-key',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false }
-}));
 
 //create user with auth
 app.post('/signup', async(req, res) => {
@@ -48,27 +46,36 @@ app.post('/signup', async(req, res) => {
     }
 });
 
-//store token in session
 app.post('/storeToken', (req, res) => {
     const { token } = req.body;
-    req.session.token = token;
+    if (!token) {
+        console.error('No token provided in request body');
+        return res.status(400).json({ success: false, error: 'No token provided' });
+    }
+    console.log('Setting token in cookie:', token);
+    res.cookie('token', token, { httpOnly: true, secure: false });
     res.sendStatus(200);
-}) 
+});
 
-//read data for the logged-in user
+
 app.get('/read/me', verifyToken, async (req, res) => {
     try {
+      console.log('Fetching user data for UID:', req.uid);
       const userDoc = await db.collection('users').doc(req.uid).get();
       if (!userDoc.exists) {
+        console.error('User not found for UID:', req.uid);
         res.status(404).json({ success: false, error: 'User not found' });
       } else {
-        res.json({ success: true, data: userDoc.data() });
+        const userData = userDoc.data();
+        console.log('User data:', userData);
+        res.json({ success: true, data: userData });
       }
     } catch (error) {
+      console.error('Error fetching user data:', error);
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });
-
+  
 //update user
 app.post('/update', async(req, res) => {
     try{
