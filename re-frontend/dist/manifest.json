@@ -1,0 +1,25 @@
+{
+    "manifest_version": 3,
+    "name": "Skingotchi",
+    "description": "Skincare Chrome Extension",
+    "version": "1.0.0",
+    "icons":  {
+        "16": "icon.png",
+        "48": "icon.png",
+        "128": "icon.png"
+    },
+    "action": {
+        "default_title": "click me",
+        "default_popup": "popup.html"
+    },
+    "permissions": [
+        "tabs",
+        "bookmarks"
+    ],
+    "background":{
+        "service_worker": "background.js"
+    },
+    "options_page": "options.html"
+
+}
+    
